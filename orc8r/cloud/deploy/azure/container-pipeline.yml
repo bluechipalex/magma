@@ -27,7 +27,7 @@ steps:
     targetType: 'inline'
     script: $(pyTools.pythonLocation)/bin/pip install pyyaml
 - task: Bash@3
-  displayName: List Environment Variables
+  displayName: TEMP - List Environment Variables
   inputs:
     targetType: 'inline'
     script: |
@@ -69,7 +69,7 @@ steps:
     targetType: 'inline'
     script: |
       docker images
-      
+
       for image in proxy controller prometheus-cache config-manager grafana
       do
           $(System.DefaultWorkingDirectory)/orc8r/tools/docker/publish.sh -r alexsonar.azurecr.io -i ${image} -v 'v1.0.1'
