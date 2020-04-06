@@ -61,7 +61,6 @@ steps:
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
     additionalDockerComposeFiles: './docker-compose.override.yml'
     action: 'Build services'
-    additionalImageTags: $(IMAGEVERSION)
     arguments: '--build-arg baseImage=orc8r_cache controller'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
 - task: Bash@3
