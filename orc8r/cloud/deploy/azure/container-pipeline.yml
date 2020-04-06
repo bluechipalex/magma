@@ -20,6 +20,12 @@ variables:
     value: magmalte    
   - name: REGISTRY
     value: alexsonar
+  - name: ACR_RESOURCE_GROUP
+    value: sonar
+  - name: ACR_SUBSCRIPTION_ID
+    value: df72d7e7-e980-42e2-8be9-e89f702836b6    
+  - name: ACR_SERVICE_CONNECTION
+    value: Alex - Subscription
 
 steps:
 - task: UsePythonVersion@0
@@ -45,8 +51,8 @@ steps:
   displayName: Build Magma Cache image
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+    azureSubscription: $(ACR_SERVICE_CONNECTION)
+    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.cache.yml'
     projectName: $(COMPOSE_PROJECT)
     qualifyImageNames: false
@@ -62,8 +68,8 @@ steps:
   displayName: Build Magma Controller Container image
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    azureSubscription: $(ACR_SERVICE_CONNECTION)
+    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
     additionalDockerComposeFiles: './docker-compose.override.yml'
     projectName: $(COMPOSE_PROJECT)
@@ -94,8 +100,8 @@ steps:
   displayName: Build Magma Container images
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    azureSubscription: $(ACR_SERVICE_CONNECTION)
+    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
     additionalDockerComposeFiles: |
       ./docker-compose.metrics.yml
@@ -115,8 +121,8 @@ steps:
   displayName: Push Magma Containers to ACR
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    azureSubscription: $(ACR_SERVICE_CONNECTION)
+    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
     additionalDockerComposeFiles: |
       ./docker-compose.override.yml
@@ -128,8 +134,8 @@ steps:
   displayName: Build NMS Container images
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    azureSubscription: $(ACR_SERVICE_CONNECTION)
+    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
     dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
     projectName: $(NMS_COMPOSE_PROJECT)
     qualifyImageNames: true
@@ -140,8 +146,8 @@ steps:
   displayName: Push NMS Container images to ACR
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    azureSubscription: $(ACR_SERVICE_CONNECTION)
+    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
     dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
     projectName: $(NMS_COMPOSE_PROJECT)
     qualifyImageNames: true
