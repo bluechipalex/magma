@@ -12,6 +12,8 @@ pool:
 variables:
   - name: PWD
     value: $(Build.SourcesDirectory)/orc8r/cloud/docker
+  - name: ImageVersion
+    value: v1.0.1
 
 steps:
 - task: UsePythonVersion@0
@@ -44,6 +46,30 @@ steps:
     qualifyImageNames: false
     action: 'Build services'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'       
+- task: Bash@3
+  displayName: List Container images
+  inputs:
+    targetType: 'inline'
+    script: |
+      docker images    
+- task: DockerCompose@0
+  displayName: Build Magma Controller Container image
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscription: 'Alex - Subscription'
+    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
+    additionalDockerComposeFiles: './docker-compose.override.yml'
+    action: 'Build services'
+    additionalImageTags: $(IMAGEVERSION)
+    arguments: '--build-arg baseImage=orc8r_cache controller'
+    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
+- task: Bash@3
+  displayName: List Container images
+  inputs:
+    targetType: 'inline'
+    script: |
+      docker images    
 - task: DockerCompose@0
   displayName: Build Magma Container images
   inputs:
@@ -52,13 +78,12 @@ steps:
     azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
     additionalDockerComposeFiles: |
+      ./docker-compose.metrics.yml
       ./docker-compose.override.yml
-      ./docker-compose.metrics.yml    
-    projectName: 
-    qualifyImageNames: true
     action: 'Build services'
-    additionalImageTags: 'v1.0.1'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'    
+    additionalImageTags: '$(IMAGEVERSION)'
+    arguments: '--build-arg baseImage=orc8r_cache'
+    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
 - task: Bash@3
   displayName: List Container images
   inputs:
@@ -91,7 +116,7 @@ steps:
     additionalImageTags: 'v1.0.1'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'
 - task: DockerCompose@0
-  displayName: Push NMS Container images
+  displayName: Push NMS Container images to ACR
   inputs:
     containerregistrytype: 'Azure Container Registry'
     azureSubscription: 'Alex - Subscription'
