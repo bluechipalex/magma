@@ -22,6 +22,13 @@ steps:
   inputs:
     targetType: 'inline'
     script: $(pyTools.pythonLocation)/bin/pip install pyyaml
+- task: Bash@3
+  displayName: Set Environment Variables
+  inputs:
+    targetType: 'inline'
+    script: |
+      export PWD=$Build_SourcesDirectory/orc8r/cloud/docker/build.py
+      echo "pwd = $PWD"
 - task: PythonScript@0
   displayName: Build All Magma Containers
   inputs:
