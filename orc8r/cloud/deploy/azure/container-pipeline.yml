@@ -17,6 +17,10 @@ steps:
     architecture: 'x64'
 - task: PythonScript@0
   inputs:
+    scriptSource: 'inline'
+    script: 'pip install pyyaml'
+- task: PythonScript@0
+  inputs:
     scriptSource: 'filePath'
     scriptPath: 'orc8r/cloud/docker/build.py'
     arguments: '-a'
