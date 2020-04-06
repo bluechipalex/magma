@@ -60,9 +60,17 @@ steps:
     azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
     additionalDockerComposeFiles: './docker-compose.override.yml'
+    projectName: 
     action: 'Build services'
     arguments: '--build-arg baseImage=orc8r_cache controller'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
+- task: Bash@3
+  displayName: Tag Controller Image
+  inputs:
+    targetType: 'inline'
+    script: |
+      IMAGE_ID=$(docker images "orc8r_controller:latest" --format "{{.ID}}")
+      docker tag "${IMAGE_ID}" "alexsonar.azurecr.io/orc8r_controller"
 - task: Bash@3
   displayName: List Container images
   inputs:
@@ -79,6 +87,7 @@ steps:
     additionalDockerComposeFiles: |
       ./docker-compose.metrics.yml
       ./docker-compose.override.yml
+    projectName: 
     action: 'Build services'
     additionalImageTags: '$(IMAGEVERSION)'
     arguments: '--build-arg baseImage=orc8r_cache'
