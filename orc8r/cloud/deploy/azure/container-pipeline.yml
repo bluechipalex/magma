@@ -16,16 +16,12 @@ steps:
     versionSpec: '3.x'
     addToPath: true
     architecture: 'x64'
+  name: pyTools
 - task: PythonScript@0
   displayName: Install Python Dependencies
   inputs:
     scriptSource: 'inline'
-    script: |
-      python -m venv antenv
-      source antenv/bin/activate
-      python -m pip install --upgrade pip
-      pip install setup
-      pip install pyyaml
+    script: $(pyTools.pythonLocation)/bin/pip install pyyaml
 - task: PythonScript@0
   displayName: Build All Magma Containers
   inputs:
