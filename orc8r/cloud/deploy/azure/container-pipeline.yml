@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  - name: PWD
+    value: $(Build.SourcesDirectory)/orc8r/cloud/docker
+
 steps:
 - task: UsePythonVersion@0
   displayName: Use Python v3.x
@@ -23,20 +27,11 @@ steps:
     targetType: 'inline'
     script: $(pyTools.pythonLocation)/bin/pip install pyyaml
 - task: Bash@3
-  displayName: Set Environment Variables
+  displayName: List Environment Variables
   inputs:
     targetType: 'inline'
     script: |
-      export PWD=$Build_SourcesDirectory/orc8r/cloud/docker
       echo "pwd = $PWD"
-- task: Bash@3
-  displayName: Temp
-  inputs:
-    targetType: 'inline'
-    script: |
-      echo "pwd = $PWD"      
-      ls
-    workingDirectory: 'orc8r/cloud/docker'
 - task: PythonScript@0
   displayName: Build All Magma Containers
   inputs:
