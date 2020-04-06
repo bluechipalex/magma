@@ -16,6 +16,8 @@ variables:
     value: v1.0.1
   - name: COMPOSE_PROJECT
     value: orc8r
+  - name: NMS_COMPOSE_PROJECT
+    value: magmalte    
   - name: REGISTRY
     value: alexsonar
 
@@ -129,7 +131,7 @@ steps:
     azureSubscription: 'Alex - Subscription'
     azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
     dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
-    projectName: $(COMPOSE_PROJECT)
+    projectName: $(NMS_COMPOSE_PROJECT)
     qualifyImageNames: true
     action: 'Build services'
     additionalImageTags: 'v1.0.1'
@@ -141,7 +143,7 @@ steps:
     azureSubscription: 'Alex - Subscription'
     azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
     dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
-    projectName: $(COMPOSE_PROJECT)
+    projectName: $(NMS_COMPOSE_PROJECT)
     qualifyImageNames: true
     action: 'Push services'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'    
