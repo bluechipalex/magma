@@ -18,7 +18,9 @@ steps:
 - task: PythonScript@0
   inputs:
     scriptSource: 'inline'
-    script: 'pip install pyyaml'
+    script: |
+      python -m pip install --upgrade pip
+      pip install pyyaml
 - task: PythonScript@0
   inputs:
     scriptSource: 'filePath'
