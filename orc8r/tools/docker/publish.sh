@@ -39,7 +39,7 @@ PROJECT=${COMPOSE_PROJECT_NAME}
 # Find the image ID for the latest build
 IMAGE_ID=$(docker images "${PROJECT}_${IMAGE}:latest" --format "{{.ID}}")
 if [ -z "${IMAGE_ID}" ]; then
-  echo "Error! Missing image! Please build the image"
+  echo "Error! Missing image! Please build the image: ${PROJECT}_${IMAGE}"
   exit 1
 fi
 
