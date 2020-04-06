@@ -26,7 +26,7 @@ steps:
   displayName: Install Python Dependencies
   inputs:
     scriptSource: 'inline'
-    script: $(pyTools.pythonLocation)/bin/pip install pyyaml
+    script: $(pyTools.pythonLocation)/bin/pip3 install pyyaml
 - task: PythonScript@0
   displayName: Build All Magma Containers
   inputs:
