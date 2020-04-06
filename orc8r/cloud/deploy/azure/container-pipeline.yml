@@ -40,12 +40,15 @@ steps:
     arguments: '-a'
     workingDirectory: 'orc8r/cloud/docker'
 - task: DockerCompose@0
+  displayName: Push Containers to ACR
   inputs:
     containerregistrytype: 'Azure Container Registry'
     azureSubscription: 'Alex - Subscription'
     azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
     dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
-    additionalDockerComposeFiles: './docker-compose.metrics.yml'
+    additionalDockerComposeFiles: |
+      ./docker-compose.override.yml
+      ./docker-compose.metrics.yml
     action: 'Push services'
     additionalImageTags: 'v1.0.1'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
