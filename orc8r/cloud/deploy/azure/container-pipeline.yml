@@ -26,5 +26,6 @@ steps:
   displayName: Build All Magma Containers
   inputs:
     scriptSource: 'filePath'
-    scriptPath: 'orc8r/cloud/docker/build.py'
+    scriptPath: 'build.py'
     arguments: '-a'
+    workingDirectory: 'orc8r/cloud/docker'
