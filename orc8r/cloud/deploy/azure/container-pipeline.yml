@@ -27,8 +27,16 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      export PWD=$Build_SourcesDirectory/orc8r/cloud/docker/build.py
+      export PWD=$Build_SourcesDirectory/orc8r/cloud/docker
       echo "pwd = $PWD"
+- task: Bash@3
+  displayName: Temp
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "pwd = $PWD"      
+      ls
+    workingDirectory: 'orc8r/cloud/docker'
 - task: PythonScript@0
   displayName: Build All Magma Containers
   inputs:
