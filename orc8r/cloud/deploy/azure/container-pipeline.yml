@@ -26,29 +26,6 @@ steps:
   inputs:
     targetType: 'inline'
     script: $(pyTools.pythonLocation)/bin/pip install pyyaml
-- task: DockerCompose@0
-  displayName: Build NMS Container images
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
-    dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
-    projectName: 
-    qualifyImageNames: true
-    action: 'Build services'
-    additionalImageTags: 'v1.0.1'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'
-- task: DockerCompose@0
-  displayName: Push NMS Container images
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'Alex - Subscription'
-    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
-    dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
-    projectName: 
-    qualifyImageNames: true
-    action: 'Push services'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'
 - task: PythonScript@0
   displayName: Stage Magma Container built context
   inputs:
@@ -101,3 +78,26 @@ steps:
     projectName: 
     action: 'Push services'
     currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
+- task: DockerCompose@0
+  displayName: Build NMS Container images
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscription: 'Alex - Subscription'
+    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
+    projectName: 
+    qualifyImageNames: true
+    action: 'Build services'
+    additionalImageTags: 'v1.0.1'
+    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'
+- task: DockerCompose@0
+  displayName: Push NMS Container images
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscription: 'Alex - Subscription'
+    azureContainerRegistry: '{"loginServer":"alexsonar.azurecr.io", "id" : "/subscriptions/df72d7e7-e980-42e2-8be9-e89f702836b6/resourceGroups/sonar/providers/Microsoft.ContainerRegistry/registries/alexsonar"}'
+    dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
+    projectName: 
+    qualifyImageNames: true
+    action: 'Push services'
+    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'    
