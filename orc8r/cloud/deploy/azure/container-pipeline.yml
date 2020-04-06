@@ -18,15 +18,10 @@ steps:
     architecture: 'x64'
   name: pyTools
 - task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      ls $(pyTools.pythonLocation)/bin  
-- task: PythonScript@0
   displayName: Install Python Dependencies
   inputs:
-    scriptSource: 'inline'
-    script: python $(pyTools.pythonLocation)/bin/pip3 install pyyaml
+    targetType: 'inline'
+    script: $(pyTools.pythonLocation)/bin/pip install pyyaml
 - task: PythonScript@0
   displayName: Build All Magma Containers
   inputs:
