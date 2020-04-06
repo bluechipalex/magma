@@ -43,6 +43,8 @@ def main() -> None:
     if args.mount:
         # Mount the source code and run a container with bash shell
         _run_docker(['run', '--rm'] + _get_mount_volumes() + ['test', 'bash'])
+    elif args.buildcontext:
+        _create_build_context()
     elif args.tests:
         # Run unit tests
         _create_build_context()
@@ -212,6 +214,8 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Orc8r build tool')
     parser.add_argument('--tests', '-t', action='store_true',
                         help="Run unit tests")
+    parser.add_argument('--buildcontext', '-c', action='store_true',
+                        help="Stages docker build context only")                                                
     parser.add_argument('--mount', '-m', action='store_true',
                         help='Mount the source code and create a bash shell')
     parser.add_argument('--nocache', '-n', action='store_true',
