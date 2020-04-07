@@ -1,13 +1,22 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# INSERT DESCRIPTION
 
 parameters:
+  - name: acrSubscriptionId
+    displayName: Azure Container Registry Subscription Id
+    type: string
+    default: df72d7e7-e980-42e2-8be9-e89f702836b6
   - name: acrResourceGroup
-    displayName: Container Registry Resource Group
+    displayName: Azure Container Registry Resource Group
     type: string
     default: sonar
+  - name: acrName
+    displayName: Azure Container Registry Name
+    type: string
+    default: alexsonar
+  - name: acrServiceConnection
+    displayName: Azure Container Registry Service Connection
+    type: string
+    default: Alex - Subscription    
 
 trigger:
 - master
@@ -21,15 +30,9 @@ variables:
     value: orc8r
   - name: NMS_COMPOSE_PROJECT
     value: magmalte    
-  - name: REGISTRY
-    value: alexsonar
-  - name: ACR_SUBSCRIPTION_ID
-    value: df72d7e7-e980-42e2-8be9-e89f702836b6    
-  - name: ACR_SERVICE_CONNECTION
-    value: Alex - Subscription
   - name: STAGE_BRANCH_PREFIX
     value: stage
-  - name: PROD_BRANCH_PREFIX
+  - name: PROD_BRANCH
     value: azure-pipelines
 
 stages:
@@ -62,8 +65,8 @@ stages:
         displayName: Build Magma Cache image
         inputs:
           containerregistrytype: 'Azure Container Registry'
-          azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureSubscription: ${{ parameters.acrServiceConnection }}
+          azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.acrSubscriptionId }}/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.cache.yml'
           projectName: $(COMPOSE_PROJECT)
           qualifyImageNames: false
@@ -79,8 +82,8 @@ stages:
         displayName: Build Magma Controller Container image
         inputs:
           containerregistrytype: 'Azure Container Registry'
-          azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureSubscription: ${{ parameters.acrServiceConnection }}
+          azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.acrSubscriptionId }}/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
           additionalDockerComposeFiles: './docker-compose.override.yml'
           projectName: $(COMPOSE_PROJECT)
@@ -100,7 +103,7 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
-            docker tag "$(COMPOSE_PROJECT)_controller:latest" "$(REGISTRY).azurecr.io/$(COMPOSE_PROJECT)_controller"
+            docker tag "$(COMPOSE_PROJECT)_controller:latest" "${{ parameters.acrName }}.azurecr.io/$(COMPOSE_PROJECT)_controller"
       - task: Bash@3
         displayName: List Container images
         inputs:
@@ -111,8 +114,8 @@ stages:
         displayName: Build Magma Container images
         inputs:
           containerregistrytype: 'Azure Container Registry'
-          azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureSubscription: ${{ parameters.acrServiceConnection }}
+          azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.acrSubscriptionId }}/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
           additionalDockerComposeFiles: |
             ./docker-compose.metrics.yml
@@ -132,8 +135,8 @@ stages:
         displayName: Push Magma Containers to ACR
         inputs:
           containerregistrytype: 'Azure Container Registry'
-          azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureSubscription: ${{ parameters.acrServiceConnection }}
+          azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.acrSubscriptionId }}/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
           additionalDockerComposeFiles: |
             ./docker-compose.override.yml
@@ -145,8 +148,8 @@ stages:
         displayName: Build NMS Container images
         inputs:
           containerregistrytype: 'Azure Container Registry'
-          azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureSubscription: ${{ parameters.acrServiceConnection }}
+          azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.acrSubscriptionId }}/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
           dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
           projectName: $(NMS_COMPOSE_PROJECT)
           qualifyImageNames: true
@@ -157,8 +160,8 @@ stages:
         displayName: Push NMS Container images to ACR
         inputs:
           containerregistrytype: 'Azure Container Registry'
-          azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureSubscription: ${{ parameters.acrServiceConnection }}
+          azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.acrSubscriptionId }}/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
           dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
           projectName: $(NMS_COMPOSE_PROJECT)
           qualifyImageNames: true
@@ -181,7 +184,7 @@ stages:
 - stage: Prod_Deploy
   jobs:
     - deployment: Production
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ variables.PROD_BRANCH_PREFIX }}'))
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ variables.PROD_BRANCH }}'))
       pool:
         vmImage: 'ubuntu-latest'
       environment: Magma_Prod
