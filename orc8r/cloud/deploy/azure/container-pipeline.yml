@@ -3,6 +3,12 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
+parameters:
+  - name: acrResourceGroup
+    displayName: Container Registry Resource Group
+    type: string
+    default: sonar
+
 trigger:
 - master
 
@@ -17,8 +23,6 @@ variables:
     value: magmalte    
   - name: REGISTRY
     value: alexsonar
-  - name: ACR_RESOURCE_GROUP
-    value: sonar
   - name: ACR_SUBSCRIPTION_ID
     value: df72d7e7-e980-42e2-8be9-e89f702836b6    
   - name: ACR_SERVICE_CONNECTION
@@ -59,7 +63,7 @@ stages:
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.cache.yml'
           projectName: $(COMPOSE_PROJECT)
           qualifyImageNames: false
@@ -76,7 +80,7 @@ stages:
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
           additionalDockerComposeFiles: './docker-compose.override.yml'
           projectName: $(COMPOSE_PROJECT)
@@ -108,7 +112,7 @@ stages:
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
           additionalDockerComposeFiles: |
             ./docker-compose.metrics.yml
@@ -129,7 +133,7 @@ stages:
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
           dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
           additionalDockerComposeFiles: |
             ./docker-compose.override.yml
@@ -142,7 +146,7 @@ stages:
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
           dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
           projectName: $(NMS_COMPOSE_PROJECT)
           qualifyImageNames: true
@@ -154,7 +158,7 @@ stages:
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: $(ACR_SERVICE_CONNECTION)
-          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/${{ parameters.acrResourceGroup }}/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
           dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
           projectName: $(NMS_COMPOSE_PROJECT)
           qualifyImageNames: true
