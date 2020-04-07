@@ -29,7 +29,7 @@ variables:
     value: azure-pipelines
 
 stages:
-- stage: Build and Publish Containers
+- stage: Build_And_Publish
   jobs:
     - job: Build
       pool:
