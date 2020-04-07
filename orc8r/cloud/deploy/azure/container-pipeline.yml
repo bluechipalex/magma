@@ -6,9 +6,6 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
   - name: PWD
     value: $(Build.SourcesDirectory)/orc8r/cloud/docker
@@ -27,129 +24,160 @@ variables:
   - name: ACR_SERVICE_CONNECTION
     value: Alex - Subscription
 
-steps:
-- task: UsePythonVersion@0
-  displayName: Use Python v3.x
-  inputs:
-    versionSpec: '3.x'
-    addToPath: true
-    architecture: 'x64'
-  name: pyTools
-- task: Bash@3
-  displayName: Install Python Dependencies
-  inputs:
-    targetType: 'inline'
-    script: $(pyTools.pythonLocation)/bin/pip install pyyaml
-- task: PythonScript@0
-  displayName: Stage Magma Container built context
-  inputs:
-    scriptSource: 'filePath'
-    scriptPath: 'orc8r/cloud/docker/build.py'
-    arguments: '-c'
-    workingDirectory: 'orc8r/cloud/docker'
-- task: DockerCompose@0
-  displayName: Build Magma Cache image
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: $(ACR_SERVICE_CONNECTION)
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
-    dockerComposeFile: 'orc8r/cloud/docker/docker-compose.cache.yml'
-    projectName: $(COMPOSE_PROJECT)
-    qualifyImageNames: false
-    action: 'Build services'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'       
-- task: Bash@3
-  displayName: List Container images
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker images    
-- task: DockerCompose@0
-  displayName: Build Magma Controller Container image
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: $(ACR_SERVICE_CONNECTION)
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
-    dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
-    additionalDockerComposeFiles: './docker-compose.override.yml'
-    projectName: $(COMPOSE_PROJECT)
-    qualifyImageNames: false
-    action: 'Build services'
-    includeLatestTag: true
-    arguments: '--build-arg baseImage=orc8r_cache controller'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
-- task: Bash@3
-  displayName: List Container images
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker images    
-- task: Bash@3
-  displayName: Tag Controller Image
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker tag "$(COMPOSE_PROJECT)_controller:latest" "$(REGISTRY).azurecr.io/$(COMPOSE_PROJECT)_controller"
-- task: Bash@3
-  displayName: List Container images
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker images    
-- task: DockerCompose@0
-  displayName: Build Magma Container images
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: $(ACR_SERVICE_CONNECTION)
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
-    dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
-    additionalDockerComposeFiles: |
-      ./docker-compose.metrics.yml
-      ./docker-compose.override.yml
-    projectName: $(COMPOSE_PROJECT)
-    action: 'Build services'
-    additionalImageTags: '$(IMAGEVERSION)'
-    arguments: '--build-arg baseImage=orc8r_cache'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
-- task: Bash@3
-  displayName: List Container images
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker images
-- task: DockerCompose@0
-  displayName: Push Magma Containers to ACR
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: $(ACR_SERVICE_CONNECTION)
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
-    dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
-    additionalDockerComposeFiles: |
-      ./docker-compose.override.yml
-      ./docker-compose.metrics.yml
-    projectName: $(COMPOSE_PROJECT)
-    action: 'Push services'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
-- task: DockerCompose@0
-  displayName: Build NMS Container images
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: $(ACR_SERVICE_CONNECTION)
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
-    dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
-    projectName: $(NMS_COMPOSE_PROJECT)
-    qualifyImageNames: true
-    action: 'Build services'
-    additionalImageTags: 'v1.0.1'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'
-- task: DockerCompose@0
-  displayName: Push NMS Container images to ACR
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: $(ACR_SERVICE_CONNECTION)
-    azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
-    dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
-    projectName: $(NMS_COMPOSE_PROJECT)
-    qualifyImageNames: true
-    action: 'Push services'
-    currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'    
+stages:
+- stage: Build and Publish Containers
+  jobs:
+    - job: Build
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: UsePythonVersion@0
+        displayName: Use Python v3.x
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+          architecture: 'x64'
+        name: pyTools
+      - task: Bash@3
+        displayName: Install Python Dependencies
+        inputs:
+          targetType: 'inline'
+          script: $(pyTools.pythonLocation)/bin/pip install pyyaml
+      - task: PythonScript@0
+        displayName: Stage Magma Container built context
+        inputs:
+          scriptSource: 'filePath'
+          scriptPath: 'orc8r/cloud/docker/build.py'
+          arguments: '-c'
+          workingDirectory: 'orc8r/cloud/docker'
+      - task: DockerCompose@0
+        displayName: Build Magma Cache image
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: $(ACR_SERVICE_CONNECTION)
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          dockerComposeFile: 'orc8r/cloud/docker/docker-compose.cache.yml'
+          projectName: $(COMPOSE_PROJECT)
+          qualifyImageNames: false
+          action: 'Build services'
+          currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'       
+      - task: Bash@3
+        displayName: List Container images
+        inputs:
+          targetType: 'inline'
+          script: |
+            docker images    
+      - task: DockerCompose@0
+        displayName: Build Magma Controller Container image
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: $(ACR_SERVICE_CONNECTION)
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
+          additionalDockerComposeFiles: './docker-compose.override.yml'
+          projectName: $(COMPOSE_PROJECT)
+          qualifyImageNames: false
+          action: 'Build services'
+          includeLatestTag: true
+          arguments: '--build-arg baseImage=orc8r_cache controller'
+          currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
+      - task: Bash@3
+        displayName: List Container images
+        inputs:
+          targetType: 'inline'
+          script: |
+            docker images    
+      - task: Bash@3
+        displayName: Tag Controller Image
+        inputs:
+          targetType: 'inline'
+          script: |
+            docker tag "$(COMPOSE_PROJECT)_controller:latest" "$(REGISTRY).azurecr.io/$(COMPOSE_PROJECT)_controller"
+      - task: Bash@3
+        displayName: List Container images
+        inputs:
+          targetType: 'inline'
+          script: |
+            docker images    
+      - task: DockerCompose@0
+        displayName: Build Magma Container images
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: $(ACR_SERVICE_CONNECTION)
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
+          additionalDockerComposeFiles: |
+            ./docker-compose.metrics.yml
+            ./docker-compose.override.yml
+          projectName: $(COMPOSE_PROJECT)
+          action: 'Build services'
+          additionalImageTags: '$(IMAGEVERSION)'
+          arguments: '--build-arg baseImage=orc8r_cache'
+          currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
+      - task: Bash@3
+        displayName: List Container images
+        inputs:
+          targetType: 'inline'
+          script: |
+            docker images
+      - task: DockerCompose@0
+        displayName: Push Magma Containers to ACR
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: $(ACR_SERVICE_CONNECTION)
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          dockerComposeFile: 'orc8r/cloud/docker/docker-compose.yml'
+          additionalDockerComposeFiles: |
+            ./docker-compose.override.yml
+            ./docker-compose.metrics.yml
+          projectName: $(COMPOSE_PROJECT)
+          action: 'Push services'
+          currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/orc8r/cloud/docker'
+      - task: DockerCompose@0
+        displayName: Build NMS Container images
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: $(ACR_SERVICE_CONNECTION)
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
+          projectName: $(NMS_COMPOSE_PROJECT)
+          qualifyImageNames: true
+          action: 'Build services'
+          additionalImageTags: 'v1.0.1'
+          currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'
+      - task: DockerCompose@0
+        displayName: Push NMS Container images to ACR
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: $(ACR_SERVICE_CONNECTION)
+          azureContainerRegistry: '{"loginServer":"$(REGISTRY).azurecr.io", "id" : "/subscriptions/$(ACR_SUBSCRIPTION_ID)/resourceGroups/$(ACR_RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(REGISTRY)"}'
+          dockerComposeFile: 'nms/fbcnms-projects/magmalte/docker-compose.yml'
+          projectName: $(NMS_COMPOSE_PROJECT)
+          qualifyImageNames: true
+          action: 'Push services'
+          currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'    
+
+- stage: Deploy to Stage
+  jobs:
+    - deployment: Stage
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: Magma_Stage
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - script: echo "Insert AKS Stage deploy..."
+
+- stage: Deploy to Prod
+  jobs:
+    - deployment: Production
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: Magma_Prod
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - script: echo "Insert AKS Prod deploy..."
+
