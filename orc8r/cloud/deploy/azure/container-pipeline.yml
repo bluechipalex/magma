@@ -161,7 +161,7 @@ stages:
           action: 'Push services'
           currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/nms/fbcnms-projects/magmalte'    
 
-- stage: Deploy to Stage
+- stage: Stage_Deploy
   jobs:
     - deployment: Stage
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ variables.STAGE_BRANCH_PREFIX }}/'))
@@ -174,7 +174,7 @@ stages:
             steps:
             - script: echo "Insert AKS Stage deploy..."
 
-- stage: Deploy to Prod
+- stage: Prod_Deploy
   jobs:
     - deployment: Production
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ variables.PROD_BRANCH_PREFIX }}'))
