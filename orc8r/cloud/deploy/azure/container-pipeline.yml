@@ -23,6 +23,10 @@ variables:
     value: df72d7e7-e980-42e2-8be9-e89f702836b6    
   - name: ACR_SERVICE_CONNECTION
     value: Alex - Subscription
+  - name: STAGE_BRANCH_PREFIX
+    value: stage
+  - name: PROD_BRANCH_PREFIX
+    value: azure-pipelines
 
 stages:
 - stage: Build and Publish Containers
@@ -160,6 +164,7 @@ stages:
 - stage: Deploy to Stage
   jobs:
     - deployment: Stage
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ variables.STAGE_BRANCH_PREFIX }}/'))
       pool:
         vmImage: 'ubuntu-latest'
       environment: Magma_Stage
@@ -172,6 +177,7 @@ stages:
 - stage: Deploy to Prod
   jobs:
     - deployment: Production
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ variables.PROD_BRANCH_PREFIX }}'))
       pool:
         vmImage: 'ubuntu-latest'
       environment: Magma_Prod
