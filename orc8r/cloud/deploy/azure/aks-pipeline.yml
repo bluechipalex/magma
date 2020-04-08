@@ -1,0 +1,15 @@
+trigger:
+- master
+
+stages:
+- stage: Configure
+  jobs:
+    - job: Configure
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: Bash@3
+        displayName: Script
+        inputs:
+          targetType: 'inline'
+          script: echo "Hello!"
