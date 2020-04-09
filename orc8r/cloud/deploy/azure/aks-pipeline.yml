@@ -15,8 +15,8 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-      - script: mkdir -p $(Agent.BuildDirectory)\s
-      - script: mkdir -p $(Agent.BuildDirectory)\overrides
+      - script: mkdir -p $(Agent.BuildDirectory)\s\magma
+      - script: mkdir -p $(Agent.BuildDirectory)\s\magma-overrides
       - checkout: self
         path: s
       - checkout: Overrides
