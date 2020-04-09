@@ -15,12 +15,13 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
+      - checkout: self
+      - checkout: Overrides
       - task: Bash@3
         displayName: Script
         inputs:
           targetType: 'inline'
           script: echo "Hello!"
-      - checkout: Overrides
       - script: dir $(Build.SourcesDirectory)
       - task: HelmInstaller@1
         inputs:
