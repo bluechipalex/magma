@@ -15,8 +15,8 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-      - script: mkdir -p $(Build.SourcesDirectory)
-      - script: mkdir -p $(Build.SourcesDirectory)\overrides
+      - script: mkdir -p $(Agent.BuildDirectory)\s
+      - script: mkdir -p $(Agent.BuildDirectory)\overrides
       - checkout: self
         path: s
       - checkout: Overrides
