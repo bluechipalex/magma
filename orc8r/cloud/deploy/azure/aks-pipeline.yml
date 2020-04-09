@@ -1,4 +1,10 @@
-name: AKS Configuration
+resources:
+  repositories:
+  - repository: Overrides
+    type: github
+    endpoint: bluechipalex - pat
+    name: bluechipalex/magma-overrides
+
 trigger:
 - master
 
@@ -14,3 +20,20 @@ stages:
         inputs:
           targetType: 'inline'
           script: echo "Hello!"
+      - checkout: Overrides
+      - script: dir $(Build.SourcesDirectory)
+      - task: HelmInstaller@1
+        inputs:
+          helmVersionToInstall: '3.1.0'
+      # - task: HelmDeploy@0
+      #   inputs:
+      #     connectionType: 'Azure Resource Manager'
+      #     azureSubscription: 'Alex - Subscription'
+      #     azureResourceGroup: 'sonar'
+      #     kubernetesCluster: 'alexsonar'
+      #     namespace: 'magma-stage'
+      #     command: 'upgrade'
+      #     chartType: 'FilePath'
+      #     chartPath: 'orc8r/cloud/helm/orc8r'
+      #     releaseName: 'orc8r'
+      #     valueFile: 'orc8r/cloud/helm/orc8r/vals.yml'
