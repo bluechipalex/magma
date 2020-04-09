@@ -1,3 +1,12 @@
+parameters:
+  - name: orc8rDbPassword
+    type: string
+    displayName: Orchestrator DB Password
+  - name: orc8rDbHost
+    type: string
+    displayName: Orchestrator DB Host
+    
+
 resources:
   repositories:
   - repository: Overrides
@@ -15,24 +24,22 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-      - script: mkdir -p $(Agent.BuildDirectory)\s\magma
-      - script: mkdir -p $(Agent.BuildDirectory)\s\magma-overrides
+      #- script: mkdir -p $(Agent.BuildDirectory)\s\magma
+      #- script: mkdir -p $(Agent.BuildDirectory)\s\magma-overrides
       - checkout: self
         path: s
       - checkout: Overrides
         path: overrides
-      - task: Bash@3
-        displayName: Script
-        inputs:
-          targetType: 'inline'
-          script: echo "Hello!"
-      - script: ls $(Build.SourcesDirectory)
-      - script: ls $(Agent.BuildDirectory)
-      - script: ls $(Agent.BuildDirectory)/overrides
       - script: |
-          mkdir -p ~/secrets/
+          mkdir -p ~/secrets
           cp -r $(Agent.BuildDirectory)/overrides/certs/ ~/secrets/certs/
           ls ~/secrets/certs
+
+          mkdir -p ~/secrets/envdir
+          echo "STREAMER,SUBSCRIBERDB,METRICSD,CERTIFIER,BOOTSTRAPPER,METERINGD_RECORDS,ACCESSD,OBSIDIAN,DISPATCHER,DIRECTORYD" > ~/secrets/envdir/CONTROLLER_SERVICES
+          echo "dbname=orc8r user=orc8r password=${{ parameters.orc8rDbPassword}} host=${{ parameters.orc8rDbHost }}" > ~/secrets/envdir/DATABASE_SOURCE
+          
+          cat ~/secrets/envdir/DATABASE_SOURCE
       - task: HelmInstaller@1
         inputs:
           helmVersionToInstall: '3.1.0'
