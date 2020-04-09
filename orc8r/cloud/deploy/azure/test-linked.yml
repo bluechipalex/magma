@@ -1,0 +1,12 @@
+trigger:
+- master
+
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - template: aks-pipeline.yml
+    parameters:
+      orc8rDbPassword: BlueChip!!
+      orc8rDbHost: testing.com
