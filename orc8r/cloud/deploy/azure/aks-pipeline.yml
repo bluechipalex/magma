@@ -25,7 +25,7 @@ stages:
           targetType: 'inline'
           script: echo "Hello!"
       - script: ls $(Build.SourcesDirectory)
-      - script: ls ./overrides
+      - script: ls $(Build.SourcesDirectory)/overrides
       - task: HelmInstaller@1
         inputs:
           helmVersionToInstall: '3.1.0'
