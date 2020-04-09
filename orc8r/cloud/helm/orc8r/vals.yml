@@ -1,0 +1,136 @@
+imagePullSecrets:
+  - name: orc8r-secrets-registry
+
+secrets:
+  create: true
+  docker:
+    registry: alexsonar.azurecr.io
+    username: alexsonar
+    password: RR9HlZMRW9awH+Ah+AH00JwloRtpvrNO
+  
+
+proxy:
+  image:
+    repository: alexsonar.azurecr.io/orc8r_proxy
+    tag: v1.0.1
+
+  replicas: 2
+
+  service:
+    name: orc8r-bootstrap-legacy
+    type: LoadBalancer
+
+  spec:
+    hostname: controller.bluechipmagma.com
+
+  nodeSelector:
+    worker-type: controller
+
+controller:
+  image:
+    repository: alexsonar.azurecr.io/orc8r_controller
+    tag: v1.0.1
+
+  replicas: 2
+
+  migration:
+    new_handlers: 1
+    new_mconfigs: 1
+
+  spec:
+    database:
+      host: alexsonar.postgres.database.azure.com
+      user: alexolear@alexsonar
+      pass: BlueChip!!
+
+  nodeSelector:
+    worker-type: controller
+
+metrics:
+  imagePullSecrets:
+    - name: orc8r-secrets-registry
+
+  metrics:
+    volumes:
+      prometheusData:
+        volumeSpec:
+          hostPath:
+            path: /prometheusData
+            type: DirectoryOrCreate
+      prometheusConfig:
+        volumeSpec:
+          hostPath:
+            path: /configs/prometheus
+            type: DirectoryOrCreate
+
+  prometheus:
+    create: true
+    nodeSelector:
+      worker-type: metrics
+
+  configmanager:
+    create: true
+    image:
+      repository: alexsonar.azurecr.io/orc8r_config-manager
+      tag: v1.0.1
+    nodeSelector:
+      worker-type: metrics
+
+  alertmanager: 
+    create: true
+    nodeSelector:
+      worker-type: metrics
+
+  prometheusCache:
+    create: true
+    image:
+      repository: alexsonar.azurecr.io/orc8r_prometheus-cache
+      tag: v1.0.1
+    limit: 500000
+    nodeSelector:
+      worker-type: metrics
+
+  grafana:
+    create: true
+    image:
+      repository: alexsonar.azurecr.io/orc8r_grafana
+      tag: v1.0.1
+    nodeSelector:
+      worker-type: metrics
+
+nms:
+  imagePullSecrets:
+    - name: orc8r-secrets-registry
+
+  magmalte:
+    manifests:
+      secrets: true
+      deployment: true
+      service: true
+      rbac: true
+
+    image:
+      repository: alexsonar.azurecr.io/magmalte_magmalte
+      tag: v1.0.1
+
+    env:
+      api_host: orc8r-proxy.magma-stage.svc.cluster.local:9443
+      mysql_host: alexmaria.mariadb.database.azure.com
+      mysql_db: magma
+      mysql_user: alexolear@alexmaria
+      mysql_pass: BlueChip!!
+  nginx:
+    manifests:
+      configmap: true
+      secrets: true
+      deployment: true
+      service: true
+      rbac: true
+
+    service:
+      type: LoadBalancer
+
+    deployment:
+      spec:
+        ssl_cert_name: controller.crt
+        ssl_cert_key_name: controller.key

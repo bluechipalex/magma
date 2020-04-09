@@ -1,0 +1,136 @@
+imagePullSecrets:
+  - name: orc8r-secrets-registry
+
+secrets:
+  create: true
+  docker:
+    registry: YOUR-DOCKER-REGISTRY # replace
+    username: YOUR-DOCKER-USERNAME # replace
+    password: YOUR-DOCKER-PASSWORD # replace
+  
+
+proxy:
+  image:
+    repository: YOUR-DOCKER-REGISTRY/proxy # replace
+    tag: YOUR-CONTAINER-TAG # replace
+
+  replicas: 2
+
+  service:
+    name: orc8r-bootstrap-legacy
+    type: LoadBalancer
+
+  spec:
+    hostname: controller.YOURDOMAIN.COM # replace
+
+  nodeSelector:
+    worker-type: controller
+
+controller:
+  image:
+    repository: YOUR-DOCKER-REGISTRY/controller # replace
+    tag: YOUR-CONTAINER-TAG # replace
+
+  replicas: 2
+
+  migration:
+    new_handlers: 1
+    new_mconfigs: 1
+
+  spec:
+    database:
+      host: YOUR POSTGRES HOST # replace
+      user: YOUR POSTGRES USERNAME # replace
+      pass: YOUR POSTGRES PASSWORD # replace
+
+  nodeSelector:
+    worker-type: controller
+
+metrics:
+  imagePullSecrets:
+    - name: orc8r-secrets-registry
+
+  metrics:
+    volumes:
+      prometheusData:
+        volumeSpec:
+          hostPath:
+            path: /prometheusData
+            type: DirectoryOrCreate
+      prometheusConfig:
+        volumeSpec:
+          hostPath:
+            path: /configs/prometheus
+            type: DirectoryOrCreate
+
+  prometheus:
+    create: true
+    nodeSelector:
+      worker-type: metrics
+
+  configmanager:
+    create: true
+    image:
+      repository: YOUR-DOCKER-REGISTRY/config-manager # replace
+      tag: YOUR-CONTAINER-TAG # replace
+    nodeSelector:
+      worker-type: metrics
+
+  alertmanager: 
+    create: true
+    nodeSelector:
+      worker-type: metrics
+
+  prometheusCache:
+    create: true
+    image:
+      repository: YOUR-DOCKER-REGISTRY/prometheus-cache # replace
+      tag: YOUR-CONTAINER-TAG # replace
+    limit: 500000
+    nodeSelector:
+      worker-type: metrics
+
+  grafana:
+    create: true
+    image:
+      repository: YOUR-DOCKER-REGISTRY/grafana # replace
+      tag: YOUR-CONTAINER-TAG # replace
+    nodeSelector:
+      worker-type: metrics
+
+nms:
+  imagePullSecrets:
+    - name: orc8r-secrets-registry
+
+  magmalte:
+    manifests:
+      secrets: false
+      deployment: false
+      service: false
+      rbac: false
+
+    image:
+      repository: YOUR-DOCKER-REGISTRY/magmalte # replace
+      tag: YOUR-CONTAINER-TAG # replace
+
+    env:
+      api_host: controller.YOURDOMAIN.COM # replace
+      mysql_host: YOUR RDS MYSQL HOST # replace
+      mysql_db: magma # replace
+      mysql_user: magma # replace
+      mysql_pass: YOUR RDS MYSQL PASSWORD # replace
+  nginx:
+    manifests:
+      configmap: false
+      secrets: false
+      deployment: false
+      service: false
+      rbac: false
+
+    service:
+      type: LoadBalancer
+
+    deployment:
+      spec:
+        ssl_cert_name: controller.crt
+        ssl_cert_key_name: controller.key
