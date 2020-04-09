@@ -15,14 +15,17 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
+      - script: mkdir overrides
       - checkout: self
       - checkout: Overrides
+        path: overrides
       - task: Bash@3
         displayName: Script
         inputs:
           targetType: 'inline'
           script: echo "Hello!"
-      - script: dir $(Build.SourcesDirectory)
+      - script: ls $(Build.SourcesDirectory)
+      - script: ls ./overrides
       - task: HelmInstaller@1
         inputs:
           helmVersionToInstall: '3.1.0'
