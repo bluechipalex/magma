@@ -17,6 +17,7 @@ stages:
       steps:
       - script: mkdir overrides
       - checkout: self
+        path: s
       - checkout: Overrides
         path: overrides
       - task: Bash@3
