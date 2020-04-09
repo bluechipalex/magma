@@ -29,6 +29,10 @@ stages:
       - script: ls $(Build.SourcesDirectory)
       - script: ls $(Agent.BuildDirectory)
       - script: ls $(Agent.BuildDirectory)/overrides
+      - script: |
+          mkdir -p ~/secrets/
+          cp -r $(Agent.BuildDirectory)/overrides/certs/ ~/secrets/certs/
+          ls ~/secrets/certs
       - task: HelmInstaller@1
         inputs:
           helmVersionToInstall: '3.1.0'
