@@ -5,53 +5,40 @@ parameters:
   - name: orc8rDbHost
     type: string
     displayName: Orchestrator DB Host
-    
 
-resources:
-  repositories:
-  - repository: Overrides
-    type: github
-    endpoint: bluechipalex - pat
-    name: bluechipalex/magma-overrides
+jobs:
+  - job: Configure
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    #- script: mkdir -p $(Agent.BuildDirectory)\s\magma
+    #- script: mkdir -p $(Agent.BuildDirectory)\s\magma-overrides
+    - checkout: self
+      path: s
+    - checkout: Overrides
+      path: overrides
+    - script: |
+        mkdir -p ~/secrets
+        cp -r $(Agent.BuildDirectory)/overrides/certs/ ~/secrets/certs/
+        ls ~/secrets/certs
 
-trigger:
-- master
-
-stages:
-- stage: Configure
-  jobs:
-    - job: Configure
-      pool:
-        vmImage: 'ubuntu-latest'
-      steps:
-      #- script: mkdir -p $(Agent.BuildDirectory)\s\magma
-      #- script: mkdir -p $(Agent.BuildDirectory)\s\magma-overrides
-      - checkout: self
-        path: s
-      - checkout: Overrides
-        path: overrides
-      - script: |
-          mkdir -p ~/secrets
-          cp -r $(Agent.BuildDirectory)/overrides/certs/ ~/secrets/certs/
-          ls ~/secrets/certs
-
-          mkdir -p ~/secrets/envdir
-          echo "STREAMER,SUBSCRIBERDB,METRICSD,CERTIFIER,BOOTSTRAPPER,METERINGD_RECORDS,ACCESSD,OBSIDIAN,DISPATCHER,DIRECTORYD" > ~/secrets/envdir/CONTROLLER_SERVICES
-          echo "dbname=orc8r user=orc8r password=${{ parameters.orc8rDbPassword}} host=${{ parameters.orc8rDbHost }}" > ~/secrets/envdir/DATABASE_SOURCE
-          
-          cat ~/secrets/envdir/DATABASE_SOURCE
-      - task: HelmInstaller@1
-        inputs:
-          helmVersionToInstall: '3.1.0'
-      # - task: HelmDeploy@0
-      #   inputs:
-      #     connectionType: 'Azure Resource Manager'
-      #     azureSubscription: 'Alex - Subscription'
-      #     azureResourceGroup: 'sonar'
-      #     kubernetesCluster: 'alexsonar'
-      #     namespace: 'magma-stage'
-      #     command: 'upgrade'
-      #     chartType: 'FilePath'
-      #     chartPath: 'orc8r/cloud/helm/orc8r'
-      #     releaseName: 'orc8r'
-      #     valueFile: 'orc8r/cloud/helm/orc8r/vals.yml'
+        mkdir -p ~/secrets/envdir
+        echo "STREAMER,SUBSCRIBERDB,METRICSD,CERTIFIER,BOOTSTRAPPER,METERINGD_RECORDS,ACCESSD,OBSIDIAN,DISPATCHER,DIRECTORYD" > ~/secrets/envdir/CONTROLLER_SERVICES
+        echo "dbname=orc8r user=orc8r password=${{ parameters.orc8rDbPassword}} host=${{ parameters.orc8rDbHost }}" > ~/secrets/envdir/DATABASE_SOURCE
+        
+        cat ~/secrets/envdir/DATABASE_SOURCE
+    - task: HelmInstaller@1
+      inputs:
+        helmVersionToInstall: '3.1.0'
+    # - task: HelmDeploy@0
+    #   inputs:
+    #     connectionType: 'Azure Resource Manager'
+    #     azureSubscription: 'Alex - Subscription'
+    #     azureResourceGroup: 'sonar'
+    #     kubernetesCluster: 'alexsonar'
+    #     namespace: 'magma-stage'
+    #     command: 'upgrade'
+    #     chartType: 'FilePath'
+    #     chartPath: 'orc8r/cloud/helm/orc8r'
+    #     releaseName: 'orc8r'
+    #     valueFile: 'orc8r/cloud/helm/orc8r/vals.yml'

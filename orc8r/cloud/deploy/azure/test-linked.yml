@@ -1,6 +1,13 @@
 trigger:
 - master
 
+resources:
+  repositories:
+  - repository: Overrides
+    type: github
+    endpoint: bluechipalex - pat
+    name: bluechipalex/magma-overrides
+
 jobs:
 - job: Linux
   pool:
