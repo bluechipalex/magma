@@ -5,6 +5,9 @@ parameters:
   - name: orc8rDbHost
     type: string
     displayName: Orchestrator DB Host
+  - name: k8sNamespace
+    type: string
+    displayName: Azure Kubernetes Namespace  
 
 steps:
 #- script: mkdir -p $(Agent.BuildDirectory)\s\magma
@@ -26,6 +29,16 @@ steps:
 - task: HelmInstaller@1
   inputs:
     helmVersionToInstall: '3.1.0'
+- task: Kubernetes@1
+  displayName: 'Configure the target namespace'
+  inputs:
+    connectionType: 'Kubernetes Service Connection'
+    command: 'apply'
+    useConfigurationFile: true
+    configurationType: 'inline'
+    inline: '{ "kind": "Namespace", "apiVersion": "v1", "metadata": { "name": "${{ parameters.k8sNamespace }}" }}'
+    secretType: 'dockerRegistry'
+    containerRegistryType: 'Azure Container Registry'    
 # - task: HelmDeploy@0
 #   inputs:
 #     connectionType: 'Azure Resource Manager'
@@ -38,19 +51,3 @@ steps:
 #     chartPath: 'orc8r/cloud/helm/orc8r'
 #     releaseName: 'orc8r'
 #     valueFile: 'orc8r/cloud/helm/orc8r/vals.yml'
-- task: Kubernetes@1
-  displayName: 'Create a new namespace for the pull request'
-  inputs:
-    command: apply
-    useConfigurationFile: true
-    inline: '{ "kind": "Namespace", "apiVersion": "v1", "metadata": { "name": "$(k8sNamespaceForPR)" }}'
-- task: Kubernetes@1
-  inputs:
-    connectionType: 'Azure Resource Manager'
-    azureSubscriptionEndpoint: 'Alex - Subscription'
-    azureResourceGroup: 'sonar'
-    kubernetesCluster: 'alexsonar'
-    command: 'create'
-    arguments: 'namespace magma-prod'
-    secretType: 'dockerRegistry'
-    containerRegistryType: 'Azure Container Registry'
